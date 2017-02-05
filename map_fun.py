@@ -167,8 +167,8 @@ class Game(object):
         # helper function to move back one tracking point
         def move_back(track_point):
             self.map.update_array(track_point.get_map_snapshot())
-            self.player.setLoc(track_points.get_location())
-            self.path_covered = track_points.get_path_covered()
+            self.player.setLoc(track_point.get_location())
+            self.path_covered = track_point.get_path_covered()
 
         while True:
             # Get players location
@@ -203,7 +203,15 @@ class Game(object):
                     self.track_points.append(track_point)
 
                     # check if we can go straight ahead. If yes we take this direction.
-                    if len(last_dir) > 0 and last_dir in possible_ways:
+                    # if len(last_dir) > 0 and last_dir in possible_ways:
+                    #     direction = last_dir
+                    if 'S' in possible_ways:
+                        direction = 'S'
+                    elif 'E' in possible_ways:
+                        direction = 'E'
+                    elif 'W' in possible_ways:
+                        direction = 'W'
+                    elif len(last_dir) > 0 and last_dir in possible_ways:
                         direction = last_dir
                     else:
                         direction = possible_ways[0]
@@ -256,30 +264,30 @@ def checkio(map_array):
 #     [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
 #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
-# checkio([
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-
 checkio([
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+
+# checkio([
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
