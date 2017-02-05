@@ -1,3 +1,4 @@
+# Map-fun!
 import copy
 import os
 import string
