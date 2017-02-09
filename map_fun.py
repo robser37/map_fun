@@ -30,8 +30,8 @@ class TrackingPoint(Location):
         self.y = location.getY()
         self.path_covered = path_covered
         self.choices = choices
+        #self.map_snapshot = copy.deepcopy(map_snapshot)
         self.map_snapshot = map_snapshot
-        self.location = location
 
     def __str__(self):
         return "Location: " + str(self.x) + "/" + \
@@ -39,7 +39,7 @@ class TrackingPoint(Location):
                 "Directions: " + str(self.choices) + "\n"
 
     def get_location(self):
-        return self.location
+        return(Location(self.x, self.y))
 
     def get_path_covered(self):
         return self.path_covered
@@ -49,6 +49,7 @@ class TrackingPoint(Location):
 
     def get_map_snapshot(self):
         return copy.deepcopy(self.map_snapshot)
+        #return self.map_snapshot
 
     def remove_choices(self, choice):
         self.choices = self.choices.replace(choice, '')
@@ -167,13 +168,20 @@ class Game(object):
         # helper function to move back one tracking point
         def move_back(track_point):
             self.map.update_array(track_point.get_map_snapshot())
+            print "track_point loc: " + str(track_point.get_location())
             self.player.setLoc(track_point.get_location())
+            print "player new loc: " + str(self.player.getLoc())
             self.path_covered = track_point.get_path_covered()
-
+        i = 0
         while True:
+            print "-------------- " + str(i) + " -------------"
             # Get players location
             player_loc = copy.copy(self.player.getLoc())
-
+            print "Player Loc:" + str(player_loc)
+            for point in self.track_points:
+                print point
+            if len(self.track_points) > 0:
+                print "Track Point Loc: " + str(self.track_points[-1].get_location())
             if visible == True:
                 os.system('clear')
                 self.map.show()
@@ -188,19 +196,23 @@ class Game(object):
                 possible_ways = self.map.get_possible_ways(player_loc)
 
             # Check if player has possibilities to move
+            print "Possible ways: " + str(possible_ways)
+
             if len(possible_ways) > 0:
                 # 1.) Only one way to go. use this direction
                 if len(possible_ways) == 1:
                     direction = possible_ways
                     if self.player.is_moved_back() == True:
+                        print "Player moved back: " + str(self.player.is_moved_back())
                         self.track_points[-1].remove_choices(direction)
 
                 #2.) More than one possible ways to go.
                 else:
                     # Take snapshot of location to come back when stuck
-                    track_point = TrackingPoint(player_loc, self.path_covered, \
-                                                possible_ways, self.map.snapshot())
-                    self.track_points.append(track_point)
+                    if self.player.is_moved_back() != True:
+                        track_point = TrackingPoint(player_loc, self.path_covered, \
+                                                    possible_ways, self.map.snapshot())
+                        self.track_points.append(track_point)
 
                     # check if we can go straight ahead. If yes we take this direction.
                     # if len(last_dir) > 0 and last_dir in possible_ways:
@@ -233,7 +245,12 @@ class Game(object):
                 last_dir = direction
             # Player is trapped, no more possible directions to go
             else:
+                print "Move back!"
                 # We go back to last tracking point
+
+                print "last Trackpoint: " + str(self.track_points[-1])
+                print "track point loc: " + str(self.track_points[-1].get_location())
+
                 move_back(self.track_points[-1])
                 possible_ways = self.track_points[-1].get_choices()
                 # here we check if there are possibilities to go
@@ -242,41 +259,52 @@ class Game(object):
                 # if not we move back to tracking point befor last tracking point
                 else:
                     self.track_points.pop()
-                    move_back(self.track_points[-1])
-                    self.player.set_moved_back(True)
+                    if not self.track_points:
+                        print "No possible way to the goal. END."
+                        return
+                    else:
+                        move_back(self.track_points[-1])
+                        self.player.set_moved_back(True)
+
+
+            i += 1
+            print " -------------------------------------------- "
+            # stop = raw_input()
+
+
 
 def checkio(map_array):
     map = Map(map_array)
     game = Game(map)
     print game.play(True)
     #print game.play(False)
-# checkio([
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-#     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1],
-#     [1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-#     [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-
 checkio([
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+    [1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+
+# checkio([
+#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1],
+#     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
 # checkio([
 #         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
