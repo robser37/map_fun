@@ -162,6 +162,7 @@ class Game(object):
         self.player = Player(map.start)
         self.track_points = []
         self.path_covered = ''
+        self.paths_to_goal = []
 
     def play(self, visible):
         last_dir = ''
@@ -239,7 +240,26 @@ class Game(object):
 
                 #Check if player reached the goal
                 if str(self.player.getLoc()) == str(self.map.get_goal()):
-                    return string.upper(self.path_covered)
+                    #return string.upper(self.path_covered)
+                    self.paths_to_goal.append(self.path_covered)
+                    self.path_covered = []
+
+                    print "reached GOAL!"
+                    #time.sleep(1)
+                    move_back(self.track_points[-1])
+                    possible_ways = self.track_points[-1].get_choices()
+                    # here we check if there are possibilities to go
+                    if len(possible_ways) > 0:
+                        self.player.set_moved_back(True)
+                    # if not we move back to tracking point befor last tracking point
+                    else:
+                        self.track_points.pop()
+                        if not self.track_points:
+                            print "No more ways to the goal. END."
+                            return self.paths_to_goal
+                        else:
+                            move_back(self.track_points[-1])
+                            self.player.set_moved_back(True)
 
                 #set last direction to check later if we can go straight ahead
                 last_dir = direction
@@ -261,7 +281,7 @@ class Game(object):
                     self.track_points.pop()
                     if not self.track_points:
                         print "No possible way to the goal. END."
-                        return
+                        return self.paths_to_goal
                     else:
                         move_back(self.track_points[-1])
                         self.player.set_moved_back(True)
@@ -276,35 +296,43 @@ class Game(object):
 def checkio(map_array):
     map = Map(map_array)
     game = Game(map)
-    print game.play(True)
-    #print game.play(False)
-checkio([
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-    [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    result_list = game.play(True)
+    print result_list
+    shortest = min(result_list, key=len)
+    longest = max(result_list, key=len)
+    print shortest
+    print "steps#: " + str(len(shortest))
+    print longest
+    print "steps#: " + str(len(longest))
 
+    #print game.play(False)
 # checkio([
 #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
-#     [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1],
+#     [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
 #     [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+#     [1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+#     [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1],
+#     [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1],
+#     [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
 #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+
+checkio([
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
 # checkio([
 #         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
