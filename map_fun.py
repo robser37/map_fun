@@ -154,7 +154,6 @@ class Player(object):
             self.move_right()
         elif string.upper(direction) == 'S':
             self.move_down()
-        else: print "invalid input!"
 
 class Game(object):
     def __init__(self, map):
@@ -169,20 +168,11 @@ class Game(object):
         # helper function to move back one tracking point
         def move_back(track_point):
             self.map.update_array(track_point.get_map_snapshot())
-            print "track_point loc: " + str(track_point.get_location())
             self.player.setLoc(track_point.get_location())
-            print "player new loc: " + str(self.player.getLoc())
             self.path_covered = track_point.get_path_covered()
-        i = 0
         while True:
-            print "-------------- " + str(i) + " -------------"
             # Get players location
             player_loc = copy.copy(self.player.getLoc())
-            print "Player Loc:" + str(player_loc)
-            for point in self.track_points:
-                print point
-            if len(self.track_points) > 0:
-                print "Track Point Loc: " + str(self.track_points[-1].get_location())
             if visible == True:
                 os.system('clear')
                 self.map.show()
@@ -197,14 +187,11 @@ class Game(object):
                 possible_ways = self.map.get_possible_ways(player_loc)
 
             # Check if player has possibilities to move
-            print "Possible ways: " + str(possible_ways)
-
             if len(possible_ways) > 0:
                 # 1.) Only one way to go. use this direction
                 if len(possible_ways) == 1:
                     direction = possible_ways
                     if self.player.is_moved_back() == True:
-                        print "Player moved back: " + str(self.player.is_moved_back())
                         self.track_points[-1].remove_choices(direction)
 
                 #2.) More than one possible ways to go.
@@ -216,8 +203,6 @@ class Game(object):
                         self.track_points.append(track_point)
 
                     # check if we can go straight ahead. If yes we take this direction.
-                    # if len(last_dir) > 0 and last_dir in possible_ways:
-                    #     direction = last_dir
                     if 'S' in possible_ways:
                         direction = 'S'
                     elif 'E' in possible_ways:
@@ -240,12 +225,8 @@ class Game(object):
 
                 #Check if player reached the goal
                 if str(self.player.getLoc()) == str(self.map.get_goal()):
-                    #return string.upper(self.path_covered)
                     self.paths_to_goal.append(self.path_covered)
                     self.path_covered = []
-
-                    print "reached GOAL!"
-                    #time.sleep(1)
                     move_back(self.track_points[-1])
                     possible_ways = self.track_points[-1].get_choices()
                     # here we check if there are possibilities to go
@@ -255,8 +236,7 @@ class Game(object):
                     else:
                         self.track_points.pop()
                         if not self.track_points:
-                            print "No more ways to the goal. END."
-                            return self.paths_to_goal
+                            return min(self.paths_to_goal, key=len)
                         else:
                             move_back(self.track_points[-1])
                             self.player.set_moved_back(True)
@@ -265,12 +245,7 @@ class Game(object):
                 last_dir = direction
             # Player is trapped, no more possible directions to go
             else:
-                print "Move back!"
                 # We go back to last tracking point
-
-                print "last Trackpoint: " + str(self.track_points[-1])
-                print "track point loc: " + str(self.track_points[-1].get_location())
-
                 move_back(self.track_points[-1])
                 possible_ways = self.track_points[-1].get_choices()
                 # here we check if there are possibilities to go
@@ -280,32 +255,17 @@ class Game(object):
                 else:
                     self.track_points.pop()
                     if not self.track_points:
-                        print "No possible way to the goal. END."
-                        return self.paths_to_goal
+                        return min(self.paths_to_goal, key=len)
                     else:
                         move_back(self.track_points[-1])
                         self.player.set_moved_back(True)
 
-
-            i += 1
-            print " -------------------------------------------- "
-            # stop = raw_input()
-
-
-
 def checkio(map_array):
     map = Map(map_array)
     game = Game(map)
-    result_list = game.play(True)
-    print result_list
-    shortest = min(result_list, key=len)
-    longest = max(result_list, key=len)
-    print shortest
-    print "steps#: " + str(len(shortest))
-    print longest
-    print "steps#: " + str(len(longest))
+    print game.play(False)
 
-    #print game.play(False)
+
 # checkio([
 #     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 #     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
