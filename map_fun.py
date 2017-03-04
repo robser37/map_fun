@@ -1,4 +1,5 @@
-# Map-fun - version 1
+# Map-fun - version 2
+
 import copy
 import os
 import string
